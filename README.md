@@ -294,3 +294,45 @@ uv run ruff check .
 ## ライセンス
 
 Apache-2.0。バックボーン `sbintuitions/modernbert-ja-310m` は MIT（`NOTICE` を参照）。
+
+---
+
+# codex cliに導入
+すでに Codex CLI 向けの導入ファイルを2つ配布しています。
+
+### 配布済みファイル
+
+**1. mcp_sokudan.py**
+- sokudan を MCP サーバーとしてラップした Python スクリプト
+- 4つのツールを提供:
+  - `analyze_japanese_text` : 汎用的な日本語テキスト分析（choice / score / bool）
+  - `route_japanese_email` : メール本文から担当部署を判定
+  - `score_urgency` : 緊急度をスコアリング
+  - `check_bool` : YES/NO 質問に対して確率を返す
+
+**2. Sokudan_CodexCLI_導入ガイド.md**
+- ステップバイステップのインストール手順
+- `~/.codex/config.toml` の設定例
+- Codex CLI 内での使用例とトラブルシューティング
+
+### 導入の流れ（概要）
+
+```bash
+# 1. sokudan をクローン・インストール
+git clone https://github.com/hiroki-abe-58/sokudan.git
+cd sokudan
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+pip install fastmcp
+
+# 2. mcp_sokudan.py を sokudan ディレクトリに配置
+
+# 3. ~/.codex/config.toml に追記
+# [mcp_servers.sokudan]
+# type = "stdio"
+# command = "/絶対パス/sokudan/.venv/bin/python"
+# args = ["/絶対パス/sokudan/mcp_sokudan.py"]
+```
+
+導入ガイドに記載のパスは、ご自身の環境に合わせて変更してください。
