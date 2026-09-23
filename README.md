@@ -298,11 +298,11 @@ Apache-2.0。バックボーン `sbintuitions/modernbert-ja-310m` は MIT（`NOT
 ---
 
 # codex cliに導入
-すでに Codex CLI 向けの導入ファイルを2つ配布しています。
+Codex CLI 向けの導入ファイル
 
 ### 配布済みファイル
 
-**1. mcp_sokudan.py**
+**1. mcp/mcp_sokudan.py**
 - sokudan を MCP サーバーとしてラップした Python スクリプト
 - 4つのツールを提供:
   - `analyze_japanese_text` : 汎用的な日本語テキスト分析（choice / score / bool）
