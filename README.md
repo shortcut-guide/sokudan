@@ -336,3 +336,93 @@ pip install fastmcp
 ```
 
 導入ガイドに記載のパスは、ご自身の環境に合わせて変更してください。
+
+---
+
+# mcpの無効化
+Codex CLI には MCP サーバーや個別ツールの有効/無効を切り替える機能があります。
+
+## 方法1: MCP サーバー全体を一時的に無効化（推奨）
+
+Codex CLI には `enable` / `disable` サブコマンドがあります。
+
+### コーディング中は sokudan を無効化
+
+```bash
+codex mcp disable sokudan
+```
+
+これで sokudan のツールは Codex から見えなくなり、コードレビューや修正時に呼び出されることはありません。
+
+### 日本語テキスト分析が必要な時だけ有効化
+
+```bash
+codex mcp enable sokudan
+```
+
+### 現在の状態を確認
+
+```bash
+codex mcp list
+```
+
+`Status` 列で `enabled` / `disabled` が確認できます。
+
+---
+
+## 方法2: 個別ツールを無効化（より細かい制御）
+
+Codex CLI は **ツールレベルでの allowlist/denylist** にも対応しています。<source-chip title="OpenAI Codex GitHub" url="https://github.com/openai/codex/commit/740b4a95f44aa0a2671d0195d45a8c7185cd9b21" />
+
+`~/.codex/config.toml` で特定のツールだけ無効化できます。
+
+```toml
+[mcp_servers.sokudan]
+enabled = true
+transport = { type = "stdio", command = "/path/to/python", args = ["/path/to/mcp_sokudan.py"] }
+
+# 特定のツールだけ無効化（denylist）
+[mcp_servers.sokudan.tools]
+disabled = ["route_japanese_email", "score_urgency"]
+```
+
+あるいは、使いたいツールだけを明示的に許可（allowlist）することも可能です。
+
+---
+
+## 方法3: プロンプトレベルでの制御
+
+Codex CLI の対話モード内で、プロンプトに明示的に指示することでも制御できます。
+
+```bash
+> コードレビューをお願い。sokudan のツールは使わず、コードだけを見てください。
+```
+
+ただし、これはモデルの判断に依存するため、方法1・2ほど確実ではありません。
+
+---
+
+## 方法4: ワークフロー別に設定ファイルを使い分ける
+
+プロジェクトごとに `.codex/config.toml` を置くことで、そのディレクトリ内では sokudan を無効化できます。
+
+```toml
+# ~/my-project/.codex/config.toml
+[mcp_servers.sokudan]
+enabled = false
+```
+
+このプロジェクト内で `codex` を起動すると、sokudan は読み込まれません。
+
+---
+
+## まとめ
+
+| 方法 | 粒度 | 確実性 | 使い分け |
+|------|------|--------|----------|
+| `codex mcp disable/enable` | サーバー全体 | 高 | セッションごとに切り替え |
+| ツール allowlist/denylist | ツール単位 | 高 | 常時有効なツールと無効なツールを分ける |
+| プロンプト指示 | 都度 | 中 | 臨時の制御 |
+| プロジェクト別 config | サーバー全体 | 高 | プロジェクトごとに固定 |
+
+**実用的な運用**としては、コーディング中は `codex mcp disable sokudan`、日本語テキスト分析が必要な時だけ `codex mcp enable sokudan` とするのが最もシンプルで確実です。
